@@ -253,15 +253,22 @@ cd terraform-gcp
 export TF_VAR_project_id="<PROJECT_ID_CỦA_BẠN>"
 export TF_VAR_machine_type="n1-standard-4"
 export TF_VAR_gpu_count=1
-export TF_VAR_hf_token="<DÁN_TOKEN_HUGGING_FACE_CỦA_BẠN_VÀO_ĐÂY>"
 terraform apply
 ```
-Gõ `yes` khi được hỏi. Terraform sẽ thay thế Compute Node CPU hiện tại bằng một node GPU (`n1-standard-4` + 1x `nvidia-tesla-t4`, Deep Learning VM Image) chạy Docker/vLLM.
+Gõ `yes` khi được hỏi. Terraform sẽ tạo node GPU (`n1-standard-4` + 1x `nvidia-tesla-t4`) và cài Docker/NVIDIA runtime. Giữ nguyên các biến `TF_VAR_project_id`, `TF_VAR_machine_type` và `TF_VAR_gpu_count` trong cùng terminal cho đến khi destroy xong.
+
+Đợi startup script hoàn tất, rồi từ máy local sao chép script khởi chạy an toàn và SSH qua IAP:
+```bash
+gcloud compute scp terraform-gcp/start_vllm_secure.sh ai-gpu-node:~/ --zone=us-central1-a --tunnel-through-iap --project="<PROJECT_ID_CỦA_BẠN>"
+gcloud compute ssh ai-gpu-node --zone=us-central1-a --tunnel-through-iap --project="<PROJECT_ID_CỦA_BẠN>"
+sudo bash ~/start_vllm_secure.sh
+```
+Script hỏi Hugging Face Read token bằng dấu nhắc ẩn. Không truyền token qua `TF_VAR_hf_token`: token được giữ trong bộ nhớ VM và không được ghi vào Terraform state hoặc instance startup metadata.
 
 > **Quan trọng:** Nếu bạn đã destroy hạ tầng CPU ở Phần 7, việc apply lại với các biến trên sẽ tạo toàn bộ hạ tầng từ đầu (~5 phút cho phần mạng, cộng thêm vài phút để attach GPU). Nếu hạ tầng CPU vẫn đang chạy, Terraform sẽ chỉ thay thế Compute Node, các phần còn lại (VPC, Cloud NAT, Load Balancer...) được giữ nguyên.
 
 ### A.4: Kiểm tra AI Endpoint (Inference)
-Sau khi apply xong, GPU Node vẫn đang chạy script tải Docker image (vLLM) và model weights (~vài GB) từ Hugging Face. **Bạn cần đợi thêm khoảng 5-10 phút** để model được nạp hoàn toàn vào VRAM của GPU.
+Sau khi khởi chạy vLLM, GPU Node tải model weights (~vài GB) từ Hugging Face. **Bạn cần đợi thêm khoảng 5-10 phút** để model được nạp hoàn toàn vào VRAM của GPU.
 
 Sử dụng IP của Load Balancer (output `load_balancer_ip`) để thực hiện truy vấn AI:
 ```bash

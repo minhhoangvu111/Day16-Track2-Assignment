@@ -1,0 +1,36 @@
+PHASE 5 / CHECKPOINT 5 — DESTROY VERIFICATION
+Project: ai-lab-16-gcp-510410
+Verification time (local): 2026-10-11 22:01:06 +07:00
+
+Terraform destroy result:
+Apply complete! Resources: 0 added, 0 changed, 16 destroyed.
+
+Terraform state:
+Command: terraform state list (run from terraform-gcp/)
+Result: no resource addresses returned; state is empty.
+
+GCP spot checks:
+- gcloud compute instances list --project=ai-lab-16-gcp-510410 --filter='name=ai-gpu-node' --format='value(name,zone,status)' -> no rows
+- gcloud compute networks list --project=ai-lab-16-gcp-510410 --filter='name=ai-vpc' --format='value(name)' -> no rows
+- gcloud compute routers nats list --router=ai-router --region=us-central1 --project=ai-lab-16-gcp-510410 --format='value(name)' -> no rows
+
+Local deliverables verified present after destroy:
+- benchmark.py
+- benchmark_result.json
+- data/creditcard.csv
+- terraform-gcp/main.tf
+- evidence/01-benchmark.png
+- evidence/02-vm-resources.png
+- evidence/03-billing-report.png
+- evidence/report.md
+
+Note: GCP project and billing account were not deleted. This verification covers the lab resources managed by Terraform and the named compute/network resources.
+
+PHASE 7 / README_GCP PART 7 RE-CHECK
+Re-verified at (local): 2026-10-11 22:08:51 +07:00
+Commands run with the authenticated gcloud account; all returned no matching rows:
+- gcloud compute instances list --project=ai-lab-16-gcp-510410 --filter=name=ai-gpu-node
+- gcloud compute networks list --project=ai-lab-16-gcp-510410 --filter=name=ai-vpc
+- gcloud compute routers nats list --router=ai-router --region=us-central1 --project=ai-lab-16-gcp-510410
+- gcloud compute forwarding-rules list --global --project=ai-lab-16-gcp-510410 --filter=name=vllm-forwarding-rule
+Terraform state list: empty.

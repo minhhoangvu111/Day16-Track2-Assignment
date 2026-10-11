@@ -20,3 +20,11 @@ lab-key.pub
 # Environment Variables
 .env
 .env.local
+
+# My custom
+mydoc/
+*.tfplan
+tfplan*
+
+# Kaggle benchmark dataset (downloaded locally; do not commit the 144 MB file)
+data/creditcard.csv

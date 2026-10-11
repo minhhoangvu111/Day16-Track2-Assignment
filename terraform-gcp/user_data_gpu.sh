@@ -20,13 +20,6 @@ apt-get install -y nvidia-container-toolkit
 nvidia-ctk runtime configure --runtime=docker
 systemctl restart docker
 
-# Run vLLM with the Gemma model
-docker run -d \
-  --gpus all \
-  --restart unless-stopped \
-  -p 8000:8000 \
-  -e HUGGING_FACE_HUB_TOKEN="${hf_token}" \
-  vllm/vllm-openai:latest \
-  --model "${model_id}" \
-  --dtype half \
-  --max-model-len 4096
+# Do not place the Hugging Face credential in instance metadata or Terraform state.
+# Start vLLM over IAP with start_vllm_secure.sh after this startup script finishes.
+echo "GPU runtime ready. Start vLLM over IAP using start_vllm_secure.sh."

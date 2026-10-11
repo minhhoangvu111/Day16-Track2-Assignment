@@ -15,13 +15,6 @@ variable "zone" {
   default     = "us-central1-a"
 }
 
-variable "hf_token" {
-  description = "Hugging Face Token for gated models (like Gemma)"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
 variable "model_id" {
   description = "Hugging Face Model ID to serve"
   type        = string
